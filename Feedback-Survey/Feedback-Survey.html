@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>School Classroom Feedback Survey</title>
+</head>
+
+<body>
+
+    <h2>Classroom Feedback Survey</h2>
+    <div class="layout" id="form">
+        <form id="feedbackSurvey">
+            <!--Student Information Field-->
+            <h3>Student Information</h3>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required><br>
+
+            <label for="gradeSection">Grade & Section:</label>
+            <select name="gradeSection" id="gradeSection">
+                <option value=" Grade 7-A">Grade 7-A</option>
+                <option value="Grade 8-B">Grade 8-B</option>
+            </select>
+            <br>
+            <!--Feedback Field-->
+            <h3 id="feedbackh3">Feedback</h3>
+            <label for="subject">Subject:</label>
+            <select name="subject" id="subject">
+                <option value="Math">Math</option>
+                <option value="Science">Science</option>
+                <option value="English">English</option>
+            </select>
+
+            <label for="star">Teacher Rating:</label>
+            <div class="star-container">
+                <div class="star">
+                    <input type="radio" id="5star" name="rating" value="5">
+                    <label for="5star">★</label>
+                    <input type="radio" id="4star" name="rating" value="4">
+                    <label for="4star">★</label>
+                    <input type="radio" id="3star" name="rating" value="3">
+                    <label for="3star">★</label>
+                    <input type="radio" id="2star" name="rating" value="2">
+                    <label for="2star">★</label>
+                    <input type="radio" id="1star" name="rating" value="1">
+                    <label for="1star">★</label>
+                </div>
+            </div>
+
+            <label for="favLesson">Favorite Lesson:</label>
+            <input type="text" id="favLesson" name="favLesson"><br>
+
+            <label for="suggestions">Suggestions for Improvement:</label>
+            <input type="text" id="suggestions" name="suggestions"><br>
+
+            <div class="anon-container">
+                <input type="checkbox" id="anon" name="anon">
+                <label for="anon" class="anon-label">Submit Anonymously</label><br>
+            </div>
+
+            <button type="submit">Submit Feedback</button>
+        </form>
+    </div>
+
+    <!--TABLE-->
+    <div class="layout" id="results">
+        <h3>Feedback Results</h3>
+
+        <!--Filter by Subject-->
+        <div class="filter">
+            <label>Filter by Subject:</label>
+            <div>
+                <select name="filterbySubject" id="filterbySubject">
+                    <option value="">All Subjects</option>
+                    <option value="Math">Math</option>
+                    <option value="Science">Science</option>
+                    <option value="English">English</option>
+                </select>
+
+                <!--Filter by Rating-->
+                <label>Filter by Rating:</label>
+                <select name="filterbyRating" id="filterbyRating">
+                    <option value="">All Rating</option>
+                    <option value="5">5 | ★★★★★</option>
+                    <option value="4">4 | ★★★★☆</option>
+                    <option value="3">3 | ★★★☆☆</option>
+                    <option value="2">2 | ★★☆☆☆</option>
+                    <option value="1">1 | ★☆☆☆☆</option>
+                </select>
+            </div>
+        </div>
+
+        <!--Results Table -->
+        <div class="table-container">
+            <table id="resultsData">
+                <thead>
+                    <tr>
+                        <th>NAME:</th>
+                        <th>GRADE & SECTION</th>
+                        <th>SUBJECT</th>
+                        <th>TEACHER RATING</th>
+                        <th>FAVORITE LESSON</th>
+                        <th>SUGGESTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!--submitted form-->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+<script>
+    const form = document.getElementById('feedbackSurvey');
+    const feedbackData = document.querySelector('#resultsData tbody');
+    const filterBySub = document.getElementById('filterbySubject');
+    const filterByRate = document.getElementById('filterbyRating');
+
+    let submittedEntries = []
+    form.addEventListener('submit', function (e){
+        e.preventDefault();
+        const name = document.getElementById('name').value.trim();
+        const gradeSection = document.getElementById('gradeSection').value;
+        const subject = document.getElementById('subject').value;
+        const rating = document.querySelector('input[name="rating"]:checked')?.value || '';
+        const favLesson = document.getElementById('favLesson').value.trim();
+        const suggestions = document.getElementById('suggestions').value.trim();
+        const isAnon = document.getElementById('anon').checked;
+        
+        if (!rating) {
+        alert('!Please select a star!');
+        return; 
+    }
+        const studname = isAnon ? 'Anonymous' : name;
+
+        const entry = {
+            name: studname,
+            gradeSection: gradeSection,
+            subject: subject,
+            rating: rating,
+            favLesson: favLesson,
+            suggestions: suggestions
+        };
+        submittedEntries.push(entry);
+        updateTable(submittedEntries);
+        form.reset();
+        alert('THANK YOU!');
+    });
+
+    function updateTable(data){
+        feedbackData.innerHTML = "";
+
+        data.forEach(function(entry) {
+            const stars = "★".repeat(entry.rating);
+            const row = `
+            <tr>
+                <td>${entry.name}</td>
+                <td>${entry.gradeSection}</td>
+                <td>${entry.subject}</td>
+                <td><span style="color: gold; font-size: 20px;">${stars}</span></td>
+                <td>${entry.favLesson}</td>
+                <td>${entry.suggestions}</td>
+            </tr>
+            `;
+            feedbackData.innerHTML += row;
+        });
+    }
+
+    filterByRate.addEventListener('change', useFilters);
+    filterBySub.addEventListener('change', useFilters);
+
+    function useFilters(){
+        const subjectFilter = filterBySub.value;
+        const rateFilter = filterByRate.value;
+        
+        let filtered = submittedEntries;
+
+        if (subjectFilter) {
+            filtered = filtered.filter(entry => entry.subject === subjectFilter);
+        }
+        if (rateFilter) {
+            filtered = filtered.filter(entry => entry.rating === rateFilter);
+        }
+        updateTable(filtered)
+    } 
+    
+</script>
+</html>
